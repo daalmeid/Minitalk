@@ -6,7 +6,7 @@
 #    By: daalmeid <daalmeid@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/19 13:11:35 by daalmeid          #+#    #+#              #
-#    Updated: 2022/01/19 13:51:54 by daalmeid         ###   ########.fr        #
+#    Updated: 2022/01/25 14:10:46 by daalmeid         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,9 +14,7 @@ NAME1	= client
 
 NAME2	= server
 
-SRCS_CLIENT	= client.c
-	
-SRCS_SERVER = server.c
+SRCS	= client.c minitalk_utils.c server.c
 
 RM = rm -f
 
@@ -24,17 +22,19 @@ LIBFTPRINTF = libftprintf.a
 
 OBJS	= *.o
 
+GCC		= gcc -Werror -Wextra -Wall
+
 $(NAME1): $(LIBFTPRINTF) $(OBJS) $(NAME2)
-	gcc -Werror -Wextra -Wall client.o -L. -lftprintf -o $(NAME1)
+	$(GCC) client.o minitalk_utils.o -L. -lftprintf -o $(NAME1)
 
 $(NAME2):
-	gcc -Werror -Wextra -Wall server.o -L. -lftprintf -o $(NAME2)
+	$(GCC) server.o minitalk_utils.o -L. -lftprintf -o $(NAME2)
 
 $(LIBFTPRINTF):
-	cd printf-main && make && mv libftprintf.a ../ && cp ft_printf.h libft/libft.h ../
+	cd ft_printf && make && mv libftprintf.a ../ && cp ft_printf.h libft/libft.h ../
 
 $(OBJS):
-	gcc -Wall -Wextra -Werror -c $(SRCS_CLIENT) $(SRCS_SERVER)
+	$(GCC)  -c $(SRCS)
 
 all:	$(NAME1)
 

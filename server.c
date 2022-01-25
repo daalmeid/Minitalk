@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server_bonus.c                                     :+:      :+:    :+:   */
+/*   server.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: daalmeid <daalmeid@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/17 14:49:49 by daalmeid          #+#    #+#             */
-/*   Updated: 2022/01/17 14:49:49 by daalmeid         ###   ########.fr       */
+/*   Created: 2022/01/25 13:46:58 by daalmeid          #+#    #+#             */
+/*   Updated: 2022/01/25 13:46:58 by daalmeid         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,61 +14,60 @@
 
 t_global	g_global;
 
-static void handle_sigusr1(int sig, siginfo_t *info, void *ucontext)
+static void	handle_sigusr1(int sig, siginfo_t *info, void *ucontext)
 {
-	static unsigned char letter = 0b11111111;
-	static unsigned char trader = 0b10000000;
+	static unsigned char	letter = 0b11111111;
+	static unsigned char	trader = 0b10000000;
 
-	if (ucontext == NULL)
-		return ;
-	if (sig == 10)
+	(void) ucontext;
+	if (sig == SIGUSR1)
 		letter ^= trader;
-	else if (sig == 12)
+	else if (sig == SIGUSR2)
 		letter |= trader;
-	trader = trader >> 1;
+	trader >>= 1;
 	if (trader == 0)
 	{	
-		g_global.letter = letter;
 		g_global.message[g_global.index++] = letter;
 		trader = 0b10000000;
 		letter = 0b11111111;
+		g_global.c_pid = info->si_pid;
 	}
-	g_global.c_pid = info->si_pid;
 }
 
-int main()
+static void	prep_act(struct sigaction *act)
 {
-   struct sigaction actusr1;
-   
-   g_global.index = 0;
-   g_global.letter = 'a';
-   ft_memset( &actusr1, '\0', sizeof(actusr1));
-   actusr1.sa_sigaction = handle_sigusr1;
-   actusr1.sa_flags = SA_SIGINFO;
-   sigemptyset(&actusr1.sa_mask);
-   sigaddset(&actusr1.sa_mask, SIGUSR1);
-   sigaddset(&actusr1.sa_mask, SIGUSR2);
-   ft_putnbr_fd(getpid(), 1);
-   ft_putchar_fd('\n', 1);
-   if (sigaction(SIGUSR1, &actusr1, NULL) == -1)
-   	{	
-   		ft_printf("Error in sigaction\n");
-		exit (0);
+	ft_memset(act, '\0', sizeof(*act));
+	act->sa_sigaction = handle_sigusr1;
+	act->sa_flags = SA_SIGINFO;
+	sigemptyset(&act->sa_mask);
+	sigaddset(&act->sa_mask, SIGUSR1);
+	sigaddset(&act->sa_mask, SIGUSR2);
+}
+
+int	main(void)
+{
+	struct sigaction	actusr1;
+
+	g_global.index = 0;
+	g_global.message[g_global.index] = 'a';
+	prep_act(&actusr1);
+	ft_printf("%d\n", getpid());
+	if (sigaction(SIGUSR1, &actusr1, NULL) == -1
+		|| sigaction(SIGUSR2, &actusr1, NULL) == -1)
+	{
+		ft_putendl_fd("Error in sigaction.", 2);
+		return (0);
 	}
-   if (sigaction(SIGUSR2, &actusr1, NULL) == -1)
-   	{	
-   		ft_printf("Error in sigaction\n");
-		exit (0);
+	while (1)
+	{
+		pause();
+		if (g_global.index != 0 && g_global.message[g_global.index - 1] == '\0')
+		{
+			ft_printf("%s\n", g_global.message);
+			usleep(100);
+			kill(g_global.c_pid, SIGUSR1);
+			g_global.index = 0;
+		}
 	}
-   while(1)
-   {
-	   if (g_global.letter == '\0')
-	   {
-		   kill(g_global.c_pid, SIGUSR1);
-		   ft_putstr_fd(g_global.message, 1);
-		   g_global.letter = 'a';
-		   g_global.index = 0;
-	   }
-   }
-   return (0);
+	return (0);
 }

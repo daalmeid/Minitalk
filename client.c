@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client_bonus.c                                     :+:      :+:    :+:   */
+/*   client.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: daalmeid <daalmeid@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/17 14:49:34 by daalmeid          #+#    #+#             */
-/*   Updated: 2022/01/17 14:49:34 by daalmeid         ###   ########.fr       */
+/*   Created: 2022/01/25 13:47:10 by daalmeid          #+#    #+#             */
+/*   Updated: 2022/01/25 13:47:10 by daalmeid         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,14 @@ static void	ft_dec_to_bin(char *av, int pid_serv)
 	{
 		while (trader != 0)
 		{
-			if (!((unsigned char) *av & trader) && kill(pid_serv, SIGUSR1) == -1)
+			if (!(*av & trader) && kill(pid_serv, SIGUSR1) == -1)
 			{	
-				ft_printf("Signaling error!\n");
+				ft_putendl_fd("Signaling error!", 2);
 				exit (0);
 			}
-			else if (((unsigned char) *av & trader) && kill(pid_serv, SIGUSR2) == -1)
+			else if ((*av & trader) && kill(pid_serv, SIGUSR2) == -1)
 			{
-				ft_printf("Signaling error!\n");
+				ft_putendl_fd("Signaling error!", 2);
 				exit (0);
 			}
 			trader = trader >> 1;
@@ -41,10 +41,10 @@ static void	ft_dec_to_bin(char *av, int pid_serv)
 	}
 }
 
-static void handle_sigusr_c(int sig)
+static void	handle_sigusr_c(int sig)
 {
-	if (sig == 10)
-		write(1, "Signal caught!\n", 16);
+	if (sig == SIGUSR1)
+		ft_putendl_fd("Server signal caught!", 1);
 	exit (0);
 }
 
@@ -59,13 +59,13 @@ static int	ft_error_check(int ac, char **av)
 	{
 		if (ft_isdigit(av[1][i++]) == 0 || av[1][0] == '-')
 		{
-			ft_printf("PID error.\n");
+			ft_putendl_fd("PID error.", 2);
 			return (0);
 		}
 	}
 	if (ft_strlen(av[2]) > 2084)
 	{
-		ft_printf("Message string too long.\n");
+		ft_putendl_fd("Message string too long.", 2);
 		return (0);
 	}
 	return (1);
@@ -73,26 +73,26 @@ static int	ft_error_check(int ac, char **av)
 
 int	main(int ac, char **av)
 {
-	int		pid;
-	struct sigaction actusr_c;
+	int					pid;
+	struct sigaction	actusr_c;
 
 	if (ft_error_check(ac, av) == 0)
 		return (0);
-	ft_memset( &actusr_c, '\0', sizeof(actusr_c));
+	ft_memset(&actusr_c, '\0', sizeof(actusr_c));
 	actusr_c.sa_handler = handle_sigusr_c;
 	sigemptyset(&actusr_c.sa_mask);
 	pid = ft_atoi(av[1]);
 	ft_dec_to_bin(av[2], pid);
 	if (sigaction(SIGUSR1, &actusr_c, NULL) == -1)
-   	{	
-		ft_printf("Error in sigaction\n");
+	{
+		ft_putendl_fd("Error in sigaction", 2);
 		return (0);
 	}
 	while (1)
 	{
 		sleep(5);
-		ft_putstr_fd("No signal received\n", 1);
-		exit (0);
+		ft_putendl_fd("No signal received", 2);
+		break ;
 	}
 	return (0);
 }
