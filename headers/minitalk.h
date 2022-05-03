@@ -16,8 +16,8 @@
 # include <signal.h>
 # include <sys/types.h>
 # include <unistd.h>
-# include "libft.h"
-# include "ft_printf.h"
+# include "../ft_printf/libft/libft.h"
+# include "./ft_printf.h"
 
 typedef struct s_global
 {

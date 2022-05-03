@@ -6,11 +6,11 @@
 /*   By: daalmeid <daalmeid@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/25 13:46:46 by daalmeid          #+#    #+#             */
-/*   Updated: 2022/01/25 13:56:47 by daalmeid         ###   ########.fr       */
+/*   Updated: 2022/05/03 14:28:47 by daalmeid         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "../headers/minitalk.h"
 
 void	*ft_memset(void *b, int c, size_t len)
 {

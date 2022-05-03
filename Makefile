@@ -5,45 +5,70 @@
 #                                                     +:+ +:+         +:+      #
 #    By: daalmeid <daalmeid@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2022/01/19 13:11:35 by daalmeid          #+#    #+#              #
-#    Updated: 2022/01/25 14:10:46 by daalmeid         ###   ########.fr        #
+#    Created: 2022/04/26 16:48:15 by daalmeid          #+#    #+#              #
+#    Updated: 2022/05/03 14:45:21 by daalmeid         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
+
+################## Program #################
 
 NAME1	= client
 
 NAME2	= server
 
-SRCS	= client.c minitalk_utils.c server.c
+################## COLORS ##################
 
-RM = rm -f
+--GRN	=		\033[32m
+--RED	=		\033[31m
+--WHT	=		\033[39m
 
-LIBFTPRINTF = libftprintf.a
+################## TERMINAL ################
 
-OBJS	= *.o
+RM		=		rm -f
 
-GCC		= gcc -Werror -Wextra -Wall
+################## COMPILER ################
 
-$(NAME1): $(LIBFTPRINTF) $(OBJS) $(NAME2)
-	$(GCC) client.o minitalk_utils.o -L. -lftprintf -o $(NAME1)
+CC		=		cc
+CFLAGS	=		-Wall -Werror -Wextra
 
-$(NAME2):
-	$(GCC) server.o minitalk_utils.o -L. -lftprintf -o $(NAME2)
+################## FILES ###################
 
-$(LIBFTPRINTF):
-	cd ft_printf && make && mv libftprintf.a ../ && cp ft_printf.h libft/libft.h ../
+SRC_CLT	=		srcs/client.c\
+				srcs/minitalk_utils.c
 
-$(OBJS):
-	$(GCC)  -c $(SRCS)
+SRC_SVR	=		srcs/server.c\
+				srcs/minitalk_utils.c
 
-all:	$(NAME1)
+OBJ_CLT	=		$(SRC_CLT:.c=.o)
+
+OBJ_SVR	=		$(SRC_SVR:.c=.o)
+
+LIB_DIR	= 		-L./ft_printf
+LIBS	=		-lftprintf
+
+################## RULES ###################
+
+all: $(NAME1) $(NAME2)
+
+$(NAME1): libftprintf $(OBJ_CLT)
+	$(CC) $(CFLAGS) $(OBJ_CLT) -o $(NAME1) $(LIB_DIR) $(LIBS)
+
+$(NAME2): libftprintf $(OBJ_SVR)
+	$(CC) $(CFLAGS) $(OBJ_SVR) -o $(NAME2) $(LIB_DIR) $(LIBS)
+
+libftprintf:
+	cd ft_printf && make
+
+################## CLEAN ###################
 
 clean:
-	$(RM) $(OBJS)
+	cd ft_printf && make clean
+	$(RM) $(OBJ_CLT) $(OBJ_SVR)
 
-fclean:	clean
+fclean: clean
+	cd ft_printf && make fclean
 	$(RM) $(NAME1) $(NAME2)
 
-re:		fclean all
+re: fclean all
 
-bonus: clean all
+.PHONY: all clean fclean re libftprintf

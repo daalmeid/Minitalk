@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "../headers/minitalk.h"
 
 static void	ft_dec_to_bin(char *av, int pid_serv)
 {
